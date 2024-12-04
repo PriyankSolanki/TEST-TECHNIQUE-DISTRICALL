@@ -12,7 +12,7 @@ Ce projet back-end est une API développé avec Symfony sur la gestion de tâche
 
 1. Ouvrez le fichier `.env`, remplacer la variable `DATABASE_URL`par votre base de données.
 
-2. Ouvrez un terminal à la racine du projet (dans le fichier task) et exécuter les commandes suivantes : 
+2. Ouvrez un terminal à la racine du projet (dans le dossier task) et exécuter les commandes suivantes : 
 ```env
  - composer install
  - php bin/console doctrine:database:create
