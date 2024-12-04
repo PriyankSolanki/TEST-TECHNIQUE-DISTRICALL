@@ -50,6 +50,49 @@ class TaskController extends AbstractController
         return new JsonResponse($jsonTask, Response::HTTP_CREATED, [], true);
    }
 
+   //GET
+   #[Route('api/task', name: 'getTask', methods: ['GET'])]
+    public function getTaskByTitleOrDescription(Request $request, TaskRepository  $taskRepository, SerializerInterface $serializer) : JsonResponse
+    {
+        $title = $request->query->get('title');
+        $description = $request->query->get('description');
+        $tasks = $taskRepository->searchByTitleOrDescription($title, $description);
+    
+        $jsonTasks = $serializer->serialize($tasks, 'json');
+    
+        return new JsonResponse($jsonTasks, Response::HTTP_OK, [], true);
+    }
+
+      
+    //PUT
+    #[Route('/api/task/{id}', name:"updateTask", methods: ['PUT'])]
+    public function updateTask(int $id,Request $request, SerializerInterface $serializer, EntityManagerInterface $em, TaskRepository $taskRepository ): JsonResponse 
+    {
+        $currentTask = $taskRepository->find($id);
+        $updateTask = $serializer->deserialize($request->getContent(), Task::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $currentTask]);
+        if (empty($updateTask->getTitle())) {
+            return new JsonResponse(['erreur' => 'La requête doit comporter une clé \'title\''], Response::HTTP_BAD_REQUEST);
+        }
+        if (strlen($updateTask->getTitle())<3 || strlen($updateTask->getTitle())>255) {
+            return new JsonResponse(['erreur' => 'Le titre doit avoir 3 à 255 caractères'], Response::HTTP_BAD_REQUEST);
+        }
+        if (empty($updateTask->getDescription())) {
+            return new JsonResponse(['erreur' => 'La requête doit comporter une clé \'description\' et ne doit pas être nulle'], Response::HTTP_BAD_REQUEST);
+        }
+        if (empty($updateTask->getStatus())) {
+            return new JsonResponse(['erreur' => 'La requête doit comporter une clé \'status\''], Response::HTTP_BAD_REQUEST);
+        }
+        if ($updateTask->getStatus()!="todo" && $updateTask->getStatus()!="in_progress" && $updateTask->getStatus()!="done") {
+            return new JsonResponse(['erreur' => 'Le status doit être : todo, in_progress ou done '], Response::HTTP_BAD_REQUEST);
+        }
+        $dateUpdate = new DateTime('now', new DateTimeZone('Europe/Paris'));
+        $updateTask->setUpdatedAt($dateUpdate);
+        $em->persist($updateTask);
+        $em->flush();
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+   }
+   
+
     //DELETE
     #[Route('/api/task/{id}', name: 'deleteTask', methods: ['DELETE'])]
     public function deleteTask(int $id, TaskRepository $taskRepository, EntityManagerInterface $em, SerializerInterface $serializer): JsonResponse 

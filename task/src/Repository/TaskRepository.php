@@ -15,29 +15,20 @@ class TaskRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Task::class);
     }
+    public function searchByTitleOrDescription(?string $title, ?string $description): array
+    {
+        $qb = $this->createQueryBuilder('t');
 
-//    /**
-//     * @return Task[] Returns an array of Task objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('t')
-//            ->andWhere('t.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('t.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+        if ($title) {
+            $qb->orWhere('t.title LIKE :title')
+               ->setParameter('title', '' . $title . '');
+        }
 
-//    public function findOneBySomeField($value): ?Task
-//    {
-//        return $this->createQueryBuilder('t')
-//            ->andWhere('t.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        if ($description) {
+            $qb->orWhere('t.description LIKE :description')
+               ->setParameter('description', '%' . $description . '%');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }
