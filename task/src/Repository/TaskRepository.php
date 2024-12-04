@@ -31,4 +31,23 @@ class TaskRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
+
+    public function getPaginatedTasks(int $page, int $limit): array
+    {
+        $query = $this->createQueryBuilder('t')
+            ->orderBy('t.created_at', 'DESC') 
+            ->setFirstResult(($page - 1) * $limit) 
+            ->setMaxResults($limit) 
+            ->getQuery();
+
+        return $query->getResult();
+    }
+
+    public function getTotalTasks(): int
+    {
+        return (int) $this->createQueryBuilder('t')
+            ->select('COUNT(t.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

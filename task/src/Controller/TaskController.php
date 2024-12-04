@@ -63,6 +63,24 @@ class TaskController extends AbstractController
         return new JsonResponse($jsonTasks, Response::HTTP_OK, [], true);
     }
 
+    #[Route('/api/task/perPage', name: 'getTaskPerPage', methods: ['GET'])]
+    public function getTaskPerPage(Request $request, TaskRepository $taskRepository, SerializerInterface $serializer): JsonResponse
+    {
+        $page = $request->query->getInt('page', 1);
+        $tasks = $taskRepository->getPaginatedTasks($page, 10);
+        $totalTasks = $taskRepository->getTotalTasks();
+
+        $jsonTasks = $serializer->serialize($tasks, 'json');
+        $response = [
+            'data' => json_decode($jsonTasks, true),
+            'total' => $totalTasks,
+            'page' => $page,
+            'total_pages' => ceil($totalTasks / 10),
+        ];
+
+        return new JsonResponse($response, Response::HTTP_OK);
+    }
+
       
     //PUT
     #[Route('/api/task/{id}', name:"updateTask", methods: ['PUT'])]
