@@ -107,7 +107,7 @@ class TaskController extends AbstractController
         $updateTask->setUpdatedAt($dateUpdate);
         $em->persist($updateTask);
         $em->flush();
-        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        return new JsonResponse(null, Response::HTTP_OK);
    }
    
 
