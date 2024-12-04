@@ -21,7 +21,7 @@ class TaskRepository extends ServiceEntityRepository
 
         if ($title) {
             $qb->orWhere('t.title LIKE :title')
-               ->setParameter('title', '' . $title . '');
+               ->setParameter('title', '%' . $title . '%');
         }
 
         if ($description) {
