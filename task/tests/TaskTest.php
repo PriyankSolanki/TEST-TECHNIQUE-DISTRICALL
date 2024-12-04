@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Tests\Controller;
+use App\Repository\TaskRepository;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -49,10 +50,15 @@ class TaskControllerTest extends WebTestCase
     public function testUpdateTask(): void
     {
         $client = static::createClient();
-        // Remplacez "1" par l'ID d'une tâche existante dans la base de données.
+        $container = static::getContainer();
+        $taskRepository = $container->get(TaskRepository::class);
+        $lastTask = $taskRepository->findOneBy([], ['id' => 'DESC']);
+        $this->assertNotNull($lastTask, 'Aucune tâche trouvée dans la base de données.');
+
+        $lastTaskId = $lastTask->getId();
         $client->request(
             'PUT',
-            '/api/task/2',
+            '/api/task/'.$lastTaskId,
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
@@ -69,8 +75,13 @@ class TaskControllerTest extends WebTestCase
     public function testDeleteTask(): void
     {
         $client = static::createClient();
-        // Remplacez "1" par l'ID d'une tâche existante dans la base de données.
-        $client->request('DELETE', '/api/task/2');
+        $container = static::getContainer();
+        $taskRepository = $container->get(TaskRepository::class);
+        $lastTask = $taskRepository->findOneBy([], ['id' => 'DESC']);
+        $this->assertNotNull($lastTask, 'Aucune tâche trouvée dans la base de données.');
+
+        $lastTaskId = $lastTask->getId();
+        $client->request('DELETE', '/api/task/'.$lastTaskId);
 
         $this->assertResponseStatusCodeSame(200);
         $data = json_decode($client->getResponse()->getContent(), true);
